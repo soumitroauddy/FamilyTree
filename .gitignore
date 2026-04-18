@@ -12,3 +12,4 @@ android/local.properties
 *.iml
 .idea/
 .vscode/
+backend/user-management-service/target/

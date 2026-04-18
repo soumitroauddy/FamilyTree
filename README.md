@@ -1,76 +1,119 @@
 # FamilyTree
 
-Interactive Flutter family tree app for iOS and Android with:
+Cross-platform family tree application with:
 
-- Zoom + pan canvas (`InteractiveViewer`)
-- Expand/collapse branches with animated transitions
-- Node cards with photo, name, and life span label
-- Connector rendering with horizontal + vertical edges
-- Tap-to-open person details sheet
-- Modular data/domain/UI architecture ready for backend integration
+- Flutter mobile app (iOS + Android)
+- New Spring Boot backend for user management and family membership
+- Social account creation (Gmail, Facebook, Microsoft)
+- Distinct control-plane and data-plane APIs
+- Dockerized local development setup
 
-## Project structure
+## Repository structure
 
 ```text
-lib/
+lib/                                   # Flutter app
   app/
-    app.dart
   core/
-    constants/
-      app_constants.dart
-    theme/
-      app_theme.dart
-  features/
-    family_tree/
-      controllers/
-        family_tree_controller.dart
-      data/
-        family_repository.dart
-        sample_family_data.dart
-      models/
-        family_tree.dart
-        person.dart
-        tree_layout.dart
-      screens/
-        family_tree_screen.dart
-      widgets/
-        family_tree_node_card.dart
-        family_tree_painter.dart
-        person_avatar.dart
-        person_details_sheet.dart
-  main.dart
-test/
-  family_tree_controller_test.dart
-pubspec.yaml
+  features/family_tree/
+test/                                  # Flutter tests
+backend/
+  user-management-service/             # Java Spring Boot backend
+    src/main/java/com/familytree/usermgmt/
+      config/
+      controller/controlplane/
+      controller/dataplane/
+      dto/
+      exception/
+      model/
+      repository/
+      service/
+    src/test/java/com/familytree/usermgmt/
+      controller/
+      service/
+docker-compose.yml
 ```
 
-## Run locally
+## Backend capabilities
 
-1. Install Flutter SDK (stable channel) and verify:
+### Auth and account creation
 
-   ```bash
-   flutter doctor
-   ```
+`POST /api/control-plane/v1/auth/social`
 
-2. Get dependencies:
+Accepts:
 
-   ```bash
-   flutter pub get
-   ```
+- `provider`: `GMAIL`, `FACEBOOK`, or `MICROSOFT`
+- `providerUserId`
+- `email`
+- `displayName`
 
-3. Run the app:
+Returns app tokens + user profile payload.
 
-   ```bash
-   flutter run
-   ```
+### Family membership
 
-4. Run tests:
+- Create family: `POST /api/control-plane/v1/families`
+- Join family: `POST /api/control-plane/v1/families/join`
+- Leave family: `POST /api/control-plane/v1/families/leave`
 
-   ```bash
-   flutter test
-   ```
+All membership endpoints require `X-User-Id`.
+
+### Control-plane APIs
+
+For account/management operations:
+
+- `POST /api/control-plane/v1/auth/social`
+- `GET /api/control-plane/v1/users/me`
+- `POST /api/control-plane/v1/families`
+- `POST /api/control-plane/v1/families/join`
+- `POST /api/control-plane/v1/families/leave`
+
+### Data-plane APIs
+
+For mobile app data consumption:
+
+- `GET /api/data-plane/v1/families/bootstrap`
+
+Returns current user and family snapshot payload for iOS/Android app bootstrap.
+
+## Local development setup (MacBook Pro friendly)
+
+### Prerequisites
+
+- Docker Desktop (latest)
+- Flutter SDK (stable)
+- Java 21 (if running backend outside Docker)
+
+### Run backend with Docker
+
+```bash
+docker compose up --build
+```
+
+Backend will be available at:
+
+- `http://localhost:8080`
+
+### Run backend tests
+
+```bash
+cd backend/user-management-service
+mvn test
+```
+
+### Run Flutter app
+
+```bash
+flutter pub get
+flutter run
+```
+
+### Run Flutter tests
+
+```bash
+flutter test
+```
 
 ## Notes
 
-- Data currently comes from `SampleFamilyData.tree()`.
-- To connect a backend later, replace `FamilyRepository.load()` with API or local DB integration while keeping controller and widgets unchanged.
+- Backend persistence is in-memory for fast local iteration and tests.
+- Replace repository implementations with database-backed adapters when moving to production.
+- Mobile integration can switch from sample data to backend APIs through `FamilyRepository`.
