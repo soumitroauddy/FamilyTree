@@ -19,6 +19,6 @@ public class ControlPlaneUserController {
 
   @GetMapping("/me")
   public ControlPlaneUserResponse me(@RequestHeader("X-User-Id") String userId) {
-    return userService.getUser(userId);
+    return userService.profile(userId);
   }
 }

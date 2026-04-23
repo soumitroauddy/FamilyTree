@@ -11,11 +11,17 @@ Cross-platform family tree application with:
 ## Repository structure
 
 ```text
-lib/                                   # Flutter app
-  app/
-  core/
-  features/family_tree/
-test/                                  # Flutter tests
+app/                                   # Flutter app
+  lib/
+    app/
+    core/
+    features/family_tree/
+  test/                                # Flutter tests
+  ios/                                 # iOS platform
+  android/                             # Android platform
+  macos/                               # macOS platform
+  web/                                 # Web platform
+  pubspec.yaml
 backend/
   user-management-service/             # Java Spring Boot backend
     src/main/java/com/familytree/usermgmt/
@@ -102,13 +108,18 @@ mvn test
 ### Run Flutter app
 
 ```bash
+cd app
 flutter pub get
-flutter run
+flutter run -d macos    # macOS desktop
+flutter run -d chrome   # Web
+flutter run -d android  # Android (emulator or device)
+flutter run -d iPhone   # iOS (simulator or device)
 ```
 
 ### Run Flutter tests
 
 ```bash
+cd app
 flutter test
 ```
 

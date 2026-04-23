@@ -8,6 +8,7 @@ import com.familytree.usermgmt.repository.UserRepository;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,27 +24,24 @@ public class AuthService {
         AuthProvider.valueOf(request.provider().trim().toUpperCase(Locale.ROOT));
     String subject = request.providerUserId().trim();
 
+    String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
+    String normalizedDisplayName = request.displayName().trim();
+
     User user =
         userRepository
             .findByProviderAndProviderUserId(provider, subject)
-            .map(
-                existing ->
-                    existing.toBuilder()
-                        .email(request.email().trim().toLowerCase(Locale.ROOT))
-                        .displayName(request.displayName().trim())
-                        .updatedAt(Instant.now())
-                        .build())
+            .map(existing -> existing.withProfile(normalizedEmail, normalizedDisplayName))
             .orElseGet(
                 () ->
-                    User.builder()
-                        .id(UUID.randomUUID().toString())
-                        .email(request.email().trim().toLowerCase(Locale.ROOT))
-                        .displayName(request.displayName().trim())
-                        .provider(provider)
-                        .providerUserId(subject)
-                        .createdAt(Instant.now())
-                        .updatedAt(Instant.now())
-                        .build());
+                    new User(
+                        UUID.randomUUID().toString(),
+                        normalizedEmail,
+                        normalizedDisplayName,
+                        provider,
+                        subject,
+                        null,
+                        Instant.now(),
+                        Instant.now()));
 
     userRepository.save(user);
 

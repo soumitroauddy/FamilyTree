@@ -38,7 +38,7 @@ public class ControlPlaneFamilyController {
       @RequestHeader("X-User-Id") String userId,
       @PathVariable String familyId,
       @Valid @RequestBody JoinFamilyRequest request) {
-    return familyService.joinFamily(userId, familyId, request);
+    return familyService.joinFamily(userId, request);
   }
 
   @DeleteMapping("/{familyId}/members/me")
@@ -47,6 +47,6 @@ public class ControlPlaneFamilyController {
       @RequestHeader("X-User-Id") String userId,
       @PathVariable String familyId,
       @Valid @RequestBody LeaveFamilyRequest request) {
-    familyService.leaveFamily(userId, familyId, request);
+    familyService.leaveFamily(userId, request);
   }
 }

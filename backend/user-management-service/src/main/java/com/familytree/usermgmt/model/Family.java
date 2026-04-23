@@ -16,4 +16,8 @@ public record Family(
   public Family {
     memberUserIds = Collections.unmodifiableSet(new LinkedHashSet<>(memberUserIds));
   }
+
+  public Family withMemberUserIds(Set<String> nextMemberUserIds) {
+    return new Family(id, name, joinCode, ownerUserId, nextMemberUserIds, createdAt);
+  }
 }

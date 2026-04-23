@@ -18,6 +18,6 @@ public class DataPlaneFamilyController {
 
   @GetMapping("/bootstrap")
   public DataPlaneBootstrapResponse bootstrap(@RequestHeader("X-User-Id") String userId) {
-    return familyService.bootstrapForUser(userId);
+    return familyService.bootstrap(userId);
   }
 }

@@ -25,10 +25,10 @@ public class InMemoryUserRepository implements UserRepository {
   }
 
   @Override
-  public Optional<User> findByProviderAndProviderSubject(AuthProvider provider, String providerSubject) {
+  public Optional<User> findByProviderAndProviderUserId(AuthProvider provider, String providerUserId) {
     return byId.values().stream()
         .filter(u -> u.provider() == provider)
-        .filter(u -> u.providerSubject().equals(providerSubject))
+        .filter(u -> u.providerUserId().equals(providerUserId))
         .findFirst();
   }
 

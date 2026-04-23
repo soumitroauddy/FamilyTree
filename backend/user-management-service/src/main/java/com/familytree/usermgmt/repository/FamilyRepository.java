@@ -12,4 +12,8 @@ public interface FamilyRepository {
   Optional<Family> findByJoinCode(String joinCode);
 
   List<Family> findAll();
+
+  List<Family> findAllByMemberUserId(String userId);
+
+  void deleteAll();
 }

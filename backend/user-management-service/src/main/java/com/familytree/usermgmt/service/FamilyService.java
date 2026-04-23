@@ -12,7 +12,6 @@ import com.familytree.usermgmt.model.User;
 import com.familytree.usermgmt.repository.FamilyRepository;
 import com.familytree.usermgmt.repository.UserRepository;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -94,15 +93,17 @@ public class FamilyService {
 
   public DataPlaneBootstrapResponse bootstrap(String userId) {
     User user = requireUser(userId);
-    var families = new ArrayList<FamilyResponse>();
-    if (user.familyId() != null) {
+    String familyId = user.familyId();
+    String familyName = null;
+    if (familyId != null) {
       Family family =
           familyRepository
-              .findById(user.familyId())
+              .findById(familyId)
               .orElseThrow(() -> new NotFoundException("Family not found for user"));
-      families.add(FamilyResponse.from(family));
+      familyName = family.name();
     }
-    return new DataPlaneBootstrapResponse(user.id(), user.email(), user.provider().name(), families);
+    return new DataPlaneBootstrapResponse(
+        user.id(), user.displayName(), user.email(), user.provider().name(), familyId, familyName);
   }
 
   private User requireUser(String userId) {

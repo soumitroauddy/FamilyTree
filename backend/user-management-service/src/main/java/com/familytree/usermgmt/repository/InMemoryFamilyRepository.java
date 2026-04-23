@@ -30,6 +30,11 @@ public class InMemoryFamilyRepository implements FamilyRepository {
   }
 
   @Override
+  public List<Family> findAll() {
+    return new ArrayList<>(store.values());
+  }
+
+  @Override
   public List<Family> findAllByMemberUserId(String userId) {
     List<Family> result = new ArrayList<>();
     for (Family family : store.values()) {
