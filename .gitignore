@@ -1,0 +1,33 @@
+# ── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Java / Maven (backend) ───────────────────────────────────────────────────
+**/target/
+*.class
+hs_err_pid*
+replay_pid*
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ── Spring Boot config / secrets ─────────────────────────────────────────────
+**/application-local.properties
+**/application-local.yml
+**/application-secret.properties
+**/application-secret.yml
+.env
+.env.*
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+**/logs/
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+# .vscode/ is intentionally not ignored — launch/task configs may be committed
+
+# ── Flutter/Dart artifacts handled by app/.gitignore ─────────────────────────

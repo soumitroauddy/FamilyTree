@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  user-management-service:
+    build:
+      context: ./backend/user-management-service
+      dockerfile: Dockerfile
+    container_name: familytree-user-management
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=8080
