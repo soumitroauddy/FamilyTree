@@ -11,6 +11,10 @@ Cross-platform family tree application with:
 ## Repository structure
 
 ```text
+run-ios.sh                             # iOS Simulator runner
+run-android.sh                         # Android emulator runner
+run-web.sh                             # Chrome (web) runner
+run-macos.sh                           # macOS desktop runner
 app/                                   # Flutter app
   lib/
     app/
@@ -22,7 +26,6 @@ app/                                   # Flutter app
   macos/                               # macOS platform
   web/                                 # Web platform
   pubspec.yaml
-  Makefile                               # convenience targets (run-macos, clean-macos)
 backend/
   user-management-service/             # Java Spring Boot backend
     src/main/java/com/familytree/usermgmt/
@@ -109,17 +112,15 @@ mvn test
 ### Run Flutter app
 
 ```bash
-./run-android.sh       # Android emulator (boot + adb device detection + flutter run)
-./run-ios.sh           # iOS Simulator (boot + simctl + flutter run; build symlink for iCloud)
-cd app
-flutter pub get
-make run-macos          # macOS desktop (recommended — see codesign note below)
-flutter run -d chrome   # Web
-flutter run -d android  # Android (emulator or device)
-flutter run -d iPhone   # iOS (simulator or device)
+./run-ios.sh           # iOS Simulator
+./run-android.sh       # Android emulator
+./run-web.sh           # Chrome (web)
+./run-macos.sh         # macOS desktop
 ```
 
-> **macOS codesign note:** If the project directory lives inside an iCloud-synced folder (e.g. `~/Documents`), the iCloud file provider daemon stamps every `.app` and `.framework` bundle directory with `com.apple.FinderInfo` and `com.apple.fileprovider.fpfs#P` extended attributes that **cannot be removed** — the daemon re-adds them immediately. Xcode codesign rejects these as _"resource fork, Finder information, or similar detritus not allowed"_. `make run-macos` (defined in `app/Makefile`) works around this by symlinking `app/build/` to `/tmp/flutter-family-tree-build`, placing all build artifacts outside iCloud's reach.
+> **iCloud codesign note:** If the repo lives inside an iCloud-synced folder
+> (e.g. `~/Documents`), `run-ios.sh` and `run-macos.sh` automatically symlink
+> `app/build/` to `/tmp/flutter-family-tree-build` to avoid codesign failures.
 
 ### Run Flutter tests
 
