@@ -110,6 +110,7 @@ mvn test
 
 ```bash
 ./run-android.sh       # Android emulator (boot + adb device detection + flutter run)
+./run-ios.sh           # iOS Simulator (boot + simctl + flutter run; build symlink for iCloud)
 cd app
 flutter pub get
 make run-macos          # macOS desktop (recommended — see codesign note below)
