@@ -1,4 +1,4 @@
-.PHONY: run-macos clean-macos
+.PHONY: run-macos run-web clean-macos
 
 # The project lives inside ~/Documents which is synced by iCloud Drive. The iCloud file
 # provider daemon stamps every .app/.framework bundle directory with com.apple.FinderInfo
@@ -18,7 +18,12 @@ run-macos:
 	  ln -s "$(BUILD_REAL)" "$(BUILD_LINK)"; \
 	  echo "Symlinked $(BUILD_LINK) -> $(BUILD_REAL) (outside iCloud)"; \
 	fi
+	@echo "Cleaning previous build artifacts..."
+	@rm -rf "$(BUILD_REAL)"/* 2>/dev/null || true
 	flutter run -d macos
+
+run-web:
+	flutter run -d chrome
 
 clean-macos:
 	flutter clean
