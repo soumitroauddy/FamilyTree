@@ -9,14 +9,23 @@ import '../models/tree_layout.dart';
 class FamilyTreeController extends ChangeNotifier {
   FamilyTreeController({
     required FamilyRepository repository,
-  }) : _repository = repository,
-       _familyTree = repository.load() {
+    String? familyId,
+  })  : _repository = repository,
+        _familyId = familyId,
+        _familyTree = repository.load() {
     _rebuildLayout();
+    if (familyId != null) {
+      loadFromBackend();
+    }
   }
 
   final FamilyRepository _repository;
+  final String? _familyId;
   FamilyTree _familyTree;
   int _layoutVersion = 0;
+  bool _isLoading = false;
+  String? _error;
+
   TreeLayout _layout = const TreeLayout(
     nodes: <TreeNodeLayout>[],
     connectors: <TreeConnector>[],
@@ -27,6 +36,8 @@ class FamilyTreeController extends ChangeNotifier {
   FamilyTree get familyTree => _familyTree;
   TreeLayout get layout => _layout;
   int get expandedCount => _familyTree.expandedIds.length;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   void toggleExpanded(Person person) {
     _familyTree = _familyTree.toggleExpanded(person.id);
@@ -35,9 +46,30 @@ class FamilyTreeController extends ChangeNotifier {
   }
 
   void reload() {
-    _familyTree = _repository.load();
-    _rebuildLayout();
+    if (_familyId != null) {
+      loadFromBackend();
+    } else {
+      _familyTree = _repository.load();
+      _rebuildLayout();
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadFromBackend() async {
+    if (_familyId == null) return;
+    _isLoading = true;
+    _error = null;
     notifyListeners();
+
+    try {
+      _familyTree = await _repository.loadFromBackend(_familyId);
+      _rebuildLayout();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void _rebuildLayout() {

@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
         .body(Map.of("status", 404, "error", "Not Found", "message", ex.getMessage()));
   }
 
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<Map<String, Object>> handleForbidden(ForbiddenException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(Map.of("status", 403, "error", "Forbidden", "message", ex.getMessage()));
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, Object>> handleMethodValidation(
       MethodArgumentNotValidException ex) {

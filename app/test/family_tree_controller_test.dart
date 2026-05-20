@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('controller toggles expansion and updates layout version', () {
     final controller = FamilyTreeController(repository: const FamilyRepository());
-    controller.load();
 
     final before = controller.layout;
     expect(before.nodes.length, greaterThan(0));
