@@ -2,10 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/particle_background.dart';
+import '../../../core/services/api_client.dart';
+import '../../../core/services/family_service.dart';
+import '../../../features/auth/controllers/auth_controller.dart';
 import '../controllers/family_tree_controller.dart';
 import '../data/family_repository.dart';
 import '../models/person.dart';
@@ -15,7 +19,9 @@ import '../widgets/family_tree_painter.dart';
 import '../widgets/person_details_sheet.dart';
 
 class FamilyTreeScreen extends StatefulWidget {
-  const FamilyTreeScreen({super.key});
+  const FamilyTreeScreen({super.key, this.familyId});
+
+  final String? familyId;
 
   @override
   State<FamilyTreeScreen> createState() => _FamilyTreeScreenState();
@@ -31,7 +37,12 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen>
   @override
   void initState() {
     super.initState();
-    _controller = FamilyTreeController(repository: const FamilyRepository());
+    final apiClient = ApiClient();
+    final familyService = FamilyService(apiClient);
+    _controller = FamilyTreeController(
+      repository: FamilyRepository(familyService: familyService),
+      familyId: widget.familyId,
+    );
     _controller.addListener(_handleUpdate);
 
     _pulseController = AnimationController(
@@ -70,6 +81,7 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen>
     return Scaffold(
       backgroundColor: AppColors.scaffold,
       extendBodyBehindAppBar: true,
+      drawer: _FamilyDrawer(familyId: widget.familyId),
       appBar: _GlassAppBar(
         onResetView: () {
           _transformationController.value = Matrix4.identity();
@@ -122,8 +134,228 @@ class _FamilyTreeScreenState extends State<FamilyTreeScreen>
               totalCount: _controller.familyTree.peopleById.length,
             ),
           ),
+
+          // Layer 4: Loading overlay
+          if (_controller.isLoading)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Color(0x80000000),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _FamilyDrawer extends StatelessWidget {
+  const _FamilyDrawer({this.familyId});
+
+  final String? familyId;
+
+  @override
+  Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
+    final session = authController.session;
+
+    return Drawer(
+      backgroundColor: AppColors.surface,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.account_tree_rounded, color: AppColors.primary, size: 32),
+                  const SizedBox(height: 12),
+                  Text(
+                    session?.displayName ?? 'Family Tree',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  if (session?.email != null)
+                    Text(
+                      session!.email,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: AppColors.onSurfaceSecondary),
+                    ),
+                  if (familyId != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Family ID: $familyId',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.primary.withValues(alpha: 0.7),
+                          ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const Divider(color: AppColors.border, height: 1),
+            const SizedBox(height: 8),
+            if (familyId == null) ...[
+              _DrawerItem(
+                icon: Icons.create_new_folder_outlined,
+                label: 'Create Family',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showCreateFamilyDialog(context);
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.group_add_outlined,
+                label: 'Join Family',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showJoinFamilyDialog(context);
+                },
+              ),
+            ] else ...[
+              _DrawerItem(
+                icon: Icons.share_outlined,
+                label: 'Invite Member',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showInviteDialog(context, familyId!);
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.download_outlined,
+                label: 'Export Tree',
+                onTap: () {
+                  Navigator.pop(context);
+                  _exportTree(context, familyId!);
+                },
+              ),
+              _DrawerItem(
+                icon: Icons.exit_to_app_rounded,
+                label: 'Leave Family',
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+            const Spacer(),
+            const Divider(color: AppColors.border, height: 1),
+            _DrawerItem(
+              icon: Icons.logout_rounded,
+              label: 'Sign Out',
+              color: Colors.redAccent,
+              onTap: () async {
+                Navigator.pop(context);
+                await authController.logout();
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCreateFamilyDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Create Family', style: TextStyle(color: AppColors.onSurface)),
+        content: TextField(
+          controller: controller,
+          style: TextStyle(color: AppColors.onSurface),
+          decoration: InputDecoration(
+            hintText: 'Family name',
+            hintStyle: TextStyle(color: AppColors.onSurfaceSecondary),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showJoinFamilyDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Join Family', style: TextStyle(color: AppColors.onSurface)),
+        content: TextField(
+          controller: controller,
+          style: TextStyle(color: AppColors.onSurface),
+          decoration: InputDecoration(
+            hintText: 'Join code (e.g. STO-A1B2C)',
+            hintStyle: TextStyle(color: AppColors.onSurfaceSecondary),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Join'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInviteDialog(BuildContext context, String familyId) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Invite feature — connect to backend to generate a code')),
+    );
+  }
+
+  void _exportTree(BuildContext context, String familyId) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Export — connect to backend to download JSON')),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? AppColors.onSurface;
+    return ListTile(
+      leading: Icon(icon, color: effectiveColor, size: 20),
+      title: Text(label, style: TextStyle(color: effectiveColor, fontSize: 14)),
+      onTap: onTap,
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
     );
   }
 }
@@ -161,7 +393,14 @@ class _GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: Row(
             children: [
-              const SizedBox(width: 8),
+              Builder(
+                builder: (ctx) => _AppBarAction(
+                  icon: Icons.menu_rounded,
+                  tooltip: 'Menu',
+                  onTap: () => Scaffold.of(ctx).openDrawer(),
+                ),
+              ),
+              const SizedBox(width: 4),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,

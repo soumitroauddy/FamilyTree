@@ -1,6 +1,54 @@
 version: "3.9"
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: familytree-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: familytree
+      POSTGRES_USER: familytree
+      POSTGRES_PASSWORD: familytree
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familytree"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: familytree-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: familytree
+      MINIO_ROOT_PASSWORD: familytree
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: familytree-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 familytree familytree &&
+        mc mb --ignore-existing local/family-tree-photos;
+        exit 0
+      "
+
   user-management-service:
     build:
       context: ./backend/user-management-service
@@ -9,5 +57,22 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - SERVER_PORT=8080
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/familytree
+      SPRING_DATASOURCE_USERNAME: familytree
+      SPRING_DATASOURCE_PASSWORD: familytree
+      APP_S3_ENDPOINT: http://minio:9000
+      APP_S3_ACCESS_KEY: familytree
+      APP_S3_SECRET_KEY: familytree
+      APP_S3_BUCKET: family-tree-photos
+      APP_S3_PRESIGNED_URL_EXPIRY_MINUTES: 60
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  minio_data:
