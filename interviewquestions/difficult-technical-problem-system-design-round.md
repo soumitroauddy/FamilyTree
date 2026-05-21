@@ -35,14 +35,15 @@ Design and operate a **stateful API** on a **container PaaS (Railway)** backed b
 
 ## 3. Failure modes (what made it “systems” hard)
 
-Two distinct failures, **same user-visible symptom** (app restart loop):
+Three distinct failures, **same user-visible symptom** (app restart loop):
 
 | # | Symptom | Layer | Root cause |
 |---|---------|-------|------------|
 | 1 | `Network is unreachable` | L3/L4 + DNS | Direct Supabase host is **IPv6-only**; PaaS egress could not reach it |
 | 2 | `Tenant or user not found` | Connection pooler routing | **Wrong regional pooler hostname**; pooler could not map username to tenant |
+| 3 | `Found non-empty schema(s) "public" but no schema history table` | Flyway migration policy | Supabase `public` is **non-empty to Flyway** (extensions, defaults) with **no** `flyway_schema_history`; not “missing app tables” |
 
-**Lesson:** “Cannot connect to database” is not one failure class. Observability should tag: DNS family, TCP reachability, pooler tenant, credentials.
+**Lesson:** “Flyway failed at startup” is not one failure class either. Partition: **reachability** → **pooler tenant** → **baseline / schema history** → credentials.
 
 ---
 
@@ -84,6 +85,32 @@ Keep Flyway at startup **enabled** rather than disabling migrations to “get gr
 
 Separation prevents “works on my machine” from leaking IPv6-only URIs into cloud deploys.
 
+### 5.4 Flyway baseline on managed Postgres (Supabase)
+
+Managed providers often ship a **non-empty `public` schema** before your app exists:
+
+| What operators see | What Flyway sees |
+|--------------------|------------------|
+| Table Editor: no `users`, `families`, etc. | `public` has extensions / default objects → **non-empty** |
+| “Database is empty, create tables first?” | Needs `flyway_schema_history` or explicit baseline |
+
+**Config (production):**
+
+```yaml
+spring:
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0   # required: default baseline 1 would skip V1__init.sql
+```
+
+| Setting | Risk if wrong |
+|---------|----------------|
+| No baseline | Crash loop on first deploy to Supabase |
+| `baseline-version: 1` only | Skips `V1__init.sql`; Hibernate `validate` fails later |
+| `baseline-version: 0` + `baseline-on-migrate` | Baselines empty-of-app-tables schema, then applies migrations |
+
+**Do not** pre-create app tables in the Supabase SQL editor unless you intentionally baseline at version 1 with a schema that matches `V1__init.sql`.
+
 ---
 
 ## 6. Observability and operability (what I’d add at Amazon scale)
@@ -94,6 +121,7 @@ Separation prevents “works on my machine” from leaking IPv6-only URIs into c
 | Crash loop only visible in platform logs | Alert on restart count + exit code before LB marks healthy |
 | Region guessed from S3 config | Runbook: pooler host **only** from Supabase dashboard connection string |
 | No pre-deploy check | CI step: `psql` or TCP + SSL handshake to pooler from CI runner |
+| Flyway baseline error looks like “empty DB” | Runbook: Supabase `public` ≠ empty to Flyway; document `baseline-version: 0` |
 
 **Health endpoint:** Spring Actuator `health` already exposed; dependency check could surface “database unreachable” vs “authentication failed” if we add a custom `DataSourceHealthIndicator` with staged checks.
 
@@ -121,7 +149,7 @@ Separation prevents “works on my machine” from leaking IPv6-only URIs into c
 
 ## 9. 90-second spoken version (System Design)
 
-> “The problem was operating a Spring Boot service on Railway against Supabase Postgres with Flyway at startup. Architecturally it’s a standard three-tier pattern, but the integration contract is subtle. Locally we use Docker DNS to `postgres`; in production we must use Supabase’s pooler for IPv4 reachability because the direct hostname is IPv6-only and Railway couldn’t connect. First incident was pure network reachability. After switching to the pooler, we hit a second class of failure—tenant not found—which is pooler routing when the regional hostname is wrong. I’d assumed US East from S3 config; the DB pooler was US West on a different AWS naming prefix. From a design standpoint I’d keep fail-fast migrations, document an explicit env contract, add staged connectivity checks in CI, and never infer database endpoints from other service regions. For scale, I’d separate migration connectivity from request-time pooling and treat regional connection strings as first-class infrastructure artifacts.”
+> “The problem was operating a Spring Boot service on Railway against Supabase Postgres with Flyway at startup. Architecturally it’s a standard three-tier pattern, but the integration contract is subtle. Locally we use Docker DNS to `postgres`; in production we use Supabase’s IPv4 pooler because the direct hostname is IPv6-only. Failure one was network reachability; failure two was wrong pooler region—tenant not found—not bad passwords. Failure three was Flyway: non-empty `public` schema but no history table. Supabase’s UI showed no app tables, but Flyway still refused to migrate until we baselined with version zero so `V1__init.sql` actually runs. I’d keep fail-fast migrations, document env and Flyway contracts in repo, add staged preflight in CI, and treat managed-Postgres baseline behavior as part of the platform matrix—not something you discover only in production.”
 
 ---
 

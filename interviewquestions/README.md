@@ -9,4 +9,8 @@ Prepared responses for Amazon Senior SDE interviews, based on real work from thi
 
 ## Source incident
 
-Spring Boot backend deploy to Railway with Supabase PostgreSQL: crash-loop due to IPv6-only direct DB hostname, then wrong Supavisor pooler region (`aws-0-us-east-1` vs actual `aws-1-us-west-1`).
+Spring Boot backend deploy to Railway with Supabase PostgreSQL: crash-loop with **three** distinct Flyway/DB failures:
+
+1. IPv6-only direct DB hostname (`Network is unreachable` on Railway)
+2. Wrong Supavisor pooler region (`Tenant or user not found`)
+3. Flyway baseline on Supabase’s non-empty `public` schema with no app tables (`Found non-empty schema(s) "public" but no schema history table` → `baseline-on-migrate` + `baseline-version: 0`)

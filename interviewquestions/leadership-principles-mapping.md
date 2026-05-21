@@ -24,7 +24,7 @@ The service was crash-looping in production; I restored a healthy deploy path by
 
 ### Learn and Be Curious
 
-When the error changed from `Network is unreachable` to `Tenant or user not found`, I treated it as a new hypothesis rather than assuming the first fix was “close enough,” and learned Supabase pooler hostnames are not uniform across regions.
+When the error changed from `Network is unreachable` to `Tenant or user not found`, I treated it as a new hypothesis rather than assuming the first fix was “close enough,” and learned Supabase pooler hostnames are not uniform across regions. A third error—Flyway “non-empty schema” with no app tables in the UI—taught me that **managed Postgres empty state ≠ Flyway empty state**, and that `baseline-version` must match whether migrations still need to run.
 
 ### Insist on the Highest Standards
 
@@ -57,9 +57,9 @@ I pushed back on treating this as an application bug or credential issue without
 | LP | Phrase from the story |
 |----|------------------------|
 | **Ownership** | Railway + Supabase + Spring/Flyway + git defaults |
-| **Dive Deep** | DNS → IPv6 → pooler → tenant → region |
+| **Dive Deep** | DNS → IPv6 → pooler → tenant → region → Flyway baseline |
 | **Deliver Results** | Crash loop → healthy startup / migrations |
-| **Learn and Be Curious** | Second error = new model |
+| **Learn and Be Curious** | Each new error = new model (3 failure classes) |
 | **Highest Standards** | No Flyway-off / blind retries |
 | **Bias for Action** | Test pooler endpoints while deploys failed |
 | **Invent and Simplify** | Explicit env contract vs guessing region |
@@ -71,7 +71,7 @@ I pushed back on treating this as an application bug or credential issue without
 
 ## 30-second LP wrap (closing line)
 
-> “This story hits **Ownership** and **Dive Deep** hardest—I didn’t stop at the first error. **Deliver Results** is the outcome: production deploy unblocked. **Learn and Be Curious** shows up when the failure mode changed after the IPv6 fix and I discovered the pooler region wasn’t what we assumed from S3 config.”
+> “This story hits **Ownership** and **Dive Deep** hardest—I didn’t stop at the first error. **Deliver Results** is production unblocked. **Learn and Be Curious** shows up three times: IPv6/pooler, wrong pooler region vs S3, then Flyway baseline when Supabase looked empty in the UI but wasn’t empty to the migrator.”
 
 ---
 
@@ -79,7 +79,7 @@ I pushed back on treating this as an application bug or credential issue without
 
 | They say | You emphasize |
 |----------|----------------|
-| **“Dive Deep”** | Two failure modes; DNS AAAA; pooler tenant routing; regional hostname matrix |
+| **“Dive Deep”** | Three failure modes; DNS AAAA; pooler tenant; Flyway baseline vs Table Editor |
 | **“Ownership”** | End-to-end; env vars + application.yml; preflight with `psql` |
 | **“Deliver Results”** | Before: restart loop; after: Flyway succeeds, service healthy |
 | **“Customer obsession”** | Users couldn’t use new backend until deploy worked; minimized downtime of *new* rollout |
