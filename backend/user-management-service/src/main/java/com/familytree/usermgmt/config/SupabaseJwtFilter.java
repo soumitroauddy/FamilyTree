@@ -2,6 +2,7 @@ package com.familytree.usermgmt.config;
 
 import com.familytree.usermgmt.service.UserSyncService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Collections;
 import java.util.Map;
 import javax.crypto.SecretKey;
@@ -20,25 +22,38 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class SupabaseJwtFilter extends OncePerRequestFilter {
 
-  private final SecretKey secretKey;
+  private final boolean productionAuthMode;
+  private final SecretKey hmacKey;
+  private final SupabaseJwksKeyResolver jwksResolver;
+  private final String expectedIssuer;
   private final UserSyncService userSyncService;
 
   /**
-   * A secret shorter than 32 bytes means JWT is disabled (local dev mode).
-   * In that mode, the filter falls back to the X-Dev-User-Id header so
-   * developers can test the API locally without a real Supabase session.
+   * A JWT secret shorter than 32 bytes means auth is in local dev mode.
+   * In that mode, the filter falls back to the X-Dev-User-Id header so developers can test
+   * the API locally without a real Supabase session.
    */
-  public SupabaseJwtFilter(String jwtSecret, UserSyncService userSyncService) {
+  public SupabaseJwtFilter(String jwtSecret, String supabaseUrl, UserSyncService userSyncService) {
+    this.productionAuthMode = jwtSecret != null && jwtSecret.length() >= 32;
+
     SecretKey key = null;
-    if (jwtSecret != null && jwtSecret.length() >= 32) {
+    if (productionAuthMode) {
       key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
-    this.secretKey = key;
+    this.hmacKey = key;
+    this.jwksResolver =
+        productionAuthMode && supabaseUrl != null && !supabaseUrl.isBlank()
+            ? new SupabaseJwksKeyResolver(supabaseUrl)
+            : null;
+    this.expectedIssuer =
+        productionAuthMode && supabaseUrl != null && !supabaseUrl.isBlank()
+            ? supabaseUrl.replaceAll("/+$", "") + "/auth/v1"
+            : null;
     this.userSyncService = userSyncService;
   }
 
   public boolean isJwtEnabled() {
-    return secretKey != null;
+    return productionAuthMode;
   }
 
   @Override
@@ -47,7 +62,7 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    if (secretKey != null) {
+    if (isJwtEnabled()) {
       authenticateViaJwt(request);
     } else {
       authenticateViaDevHeader(request);
@@ -62,11 +77,12 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
 
     String token = header.substring(7);
     try {
-      Claims claims = Jwts.parser()
-          .verifyWith(secretKey)
-          .build()
-          .parseSignedClaims(token)
-          .getPayload();
+      var parserBuilder = Jwts.parser().keyLocator(this::locateKey);
+      if (expectedIssuer != null) {
+        parserBuilder.requireIssuer(expectedIssuer);
+      }
+
+      Claims claims = parserBuilder.build().parseSignedClaims(token).getPayload();
 
       String userId = claims.getSubject();
       if (userId != null) {
@@ -78,6 +94,29 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
     } catch (JwtException | IllegalArgumentException e) {
       SecurityContextHolder.clearContext();
     }
+  }
+
+  private Key locateKey(Header header) {
+    String algorithm = header.getAlgorithm();
+    if (algorithm == null) {
+      throw new JwtException("JWT algorithm header is missing");
+    }
+
+    return switch (algorithm) {
+      case "HS256", "HS384", "HS512" -> {
+        if (hmacKey == null) {
+          throw new JwtException("HMAC JWT validation is not configured");
+        }
+        yield hmacKey;
+      }
+      case "ES256" -> {
+        if (jwksResolver == null || !jwksResolver.isConfigured()) {
+          throw new JwtException("Supabase JWKS validation is not configured");
+        }
+        yield jwksResolver.resolve(header.getKeyId());
+      }
+      default -> throw new JwtException("Unsupported JWT algorithm: " + algorithm);
+    };
   }
 
   private void authenticateViaDevHeader(HttpServletRequest request) {

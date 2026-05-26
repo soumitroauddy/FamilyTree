@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class SupabaseProperties {
 
   private String jwtSecret;
+  private String url;
 
   public String getJwtSecret() {
     return jwtSecret;
@@ -15,5 +16,13 @@ public class SupabaseProperties {
 
   public void setJwtSecret(String jwtSecret) {
     this.jwtSecret = jwtSecret;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
   }
 }

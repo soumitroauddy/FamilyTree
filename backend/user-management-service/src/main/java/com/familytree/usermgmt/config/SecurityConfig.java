@@ -24,7 +24,10 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     SupabaseJwtFilter jwtFilter =
-        new SupabaseJwtFilter(supabaseProperties.getJwtSecret(), userSyncService);
+        new SupabaseJwtFilter(
+            supabaseProperties.getJwtSecret(),
+            supabaseProperties.getUrl(),
+            userSyncService);
 
     http
         .csrf(csrf -> csrf.disable())
