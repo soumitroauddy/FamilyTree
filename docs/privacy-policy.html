@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Family Tree App</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:  #1b5e20;
+      --green-mid:   #2e7d32;
+      --green-light: #4caf50;
+      --green-pale:  #e8f5e9;
+      --text:        #212121;
+      --muted:       #555;
+      --border:      #c8e6c9;
+      --white:       #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      background: var(--green-pale);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+      color: var(--white);
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    header .logo {
+      font-size: 2.8rem;
+      margin-bottom: .4rem;
+    }
+
+    header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -.5px;
+    }
+
+    header p.subtitle {
+      margin-top: .5rem;
+      font-size: .95rem;
+      opacity: .85;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 800px;
+      margin: 2.5rem auto 4rem;
+      padding: 0 1.25rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem 2.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .card h2 .icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .card p, .card li {
+      font-size: .96rem;
+      color: var(--muted);
+      margin-bottom: .55rem;
+    }
+
+    .card ul, .card ol {
+      padding-left: 1.4rem;
+    }
+
+    .card li { margin-bottom: .4rem; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin-top: .75rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+
+    th {
+      background: var(--green-pale);
+      color: var(--green-dark);
+      font-weight: 700;
+      text-align: left;
+      padding: .6rem .85rem;
+      border: 1px solid var(--border);
+    }
+
+    td {
+      padding: .55rem .85rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #f9fbe7; }
+
+    /* ── Highlight box ── */
+    .highlight {
+      background: var(--green-pale);
+      border-left: 4px solid var(--green-light);
+      border-radius: 6px;
+      padding: .9rem 1.1rem;
+      margin-top: .75rem;
+      font-size: .93rem;
+      color: var(--green-dark);
+    }
+
+    /* ── Effective date pill ── */
+    .date-pill {
+      display: inline-block;
+      background: var(--green-pale);
+      color: var(--green-dark);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .3rem .9rem;
+      font-size: .85rem;
+      font-weight: 600;
+      margin-top: .75rem;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--green-mid); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 520px) {
+      .card { padding: 1.25rem 1rem; }
+      header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🌳</div>
+    <h1>Privacy Policy</h1>
+    <p class="subtitle">Family Tree App &mdash; <em>com.skunkworks.family_tree_app</em></p>
+    <span class="date-pill">Effective July 1, 2026</span>
+  </header>
+
+  <main>
+
+    <!-- Overview -->
+    <div class="card">
+      <h2><span class="icon">👋</span> Overview</h2>
+      <p>
+        Family Tree App ("we," "us," or "our") is a cross-platform mobile and web
+        application that helps families build and share interactive family trees.
+        This Privacy Policy explains what personal data we collect, how we use it,
+        and the choices you have regarding your information.
+      </p>
+      <p>
+        By creating an account or using the app, you agree to the practices
+        described in this policy. If you disagree, please do not use the app.
+      </p>
+    </div>
+
+    <!-- Data we collect -->
+    <div class="card">
+      <h2><span class="icon">📋</span> Information We Collect</h2>
+
+      <h2 style="font-size:.97rem; color:#333; font-weight:600; margin-top:.25rem; margin-bottom:.6rem;">
+        Account &amp; Identity Data
+      </h2>
+      <ul>
+        <li>Email address (required for registration and password recovery)</li>
+        <li>Display name (chosen by you)</li>
+        <li>Authentication provider (email/password, Google, or Facebook)</li>
+        <li>OAuth provider user ID (when signing in via Google or Facebook)</li>
+      </ul>
+
+      <h2 style="font-size:.97rem; color:#333; font-weight:600; margin-top:1rem; margin-bottom:.6rem;">
+        Family Tree Data
+      </h2>
+      <ul>
+        <li>Family name and join code you create</li>
+        <li>Family member profiles you add: full name, birth year, death year,
+            biography, location, and relationships between members</li>
+        <li>Photos you upload for family members</li>
+        <li>Invitation codes (and optionally an invitee email address)</li>
+      </ul>
+
+      <h2 style="font-size:.97rem; color:#333; font-weight:600; margin-top:1rem; margin-bottom:.6rem;">
+        Device &amp; Usage Data
+      </h2>
+      <ul>
+        <li>Authentication session tokens (stored locally via <code>shared_preferences</code>)</li>
+        <li>Standard server request logs (IP address, timestamp, request path) — retained for up to 30 days</li>
+      </ul>
+
+      <div class="highlight">
+        We do <strong>not</strong> collect precise device location, contacts,
+        call logs, microphone audio, or any data beyond what is listed above.
+      </div>
+    </div>
+
+    <!-- How we use data -->
+    <div class="card">
+      <h2><span class="icon">⚙️</span> How We Use Your Information</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Purpose</th>
+              <th>Data Used</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Create and authenticate your account</td>
+              <td>Email, display name, OAuth tokens</td>
+            </tr>
+            <tr>
+              <td>Build and display your family tree</td>
+              <td>Member profiles, photos, relationships</td>
+            </tr>
+            <tr>
+              <td>Send password-reset OTP codes</td>
+              <td>Email address</td>
+            </tr>
+            <tr>
+              <td>Enable family sharing via invite codes</td>
+              <td>Join codes, optional invitee email</td>
+            </tr>
+            <tr>
+              <td>Export your family tree data</td>
+              <td>All family tree data (on request)</td>
+            </tr>
+            <tr>
+              <td>Debug errors and improve the service</td>
+              <td>Anonymised server logs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Third parties -->
+    <div class="card">
+      <h2><span class="icon">🔗</span> Third-Party Services</h2>
+      <p>
+        Family Tree App relies on the following third-party services. Each has
+        its own privacy policy that governs how they handle your data.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Purpose</th>
+              <th>Data Shared</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase</a></td>
+              <td>Authentication, user database, session management</td>
+              <td>Email, display name, OAuth tokens</td>
+            </tr>
+            <tr>
+              <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google (OAuth)</a></td>
+              <td>Optional social sign-in</td>
+              <td>Google account ID, email (only when you choose Google sign-in)</td>
+            </tr>
+            <tr>
+              <td><a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener">Meta / Facebook (OAuth)</a></td>
+              <td>Optional social sign-in</td>
+              <td>Facebook account ID, email (only when you choose Facebook sign-in)</td>
+            </tr>
+            <tr>
+              <td>S3-compatible object storage</td>
+              <td>Store member photos</td>
+              <td>Photos you explicitly upload</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:.9rem;">
+        We do <strong>not</strong> sell, rent, or trade your personal data with
+        any third party for advertising or marketing purposes.
+      </p>
+    </div>
+
+    <!-- Data storage -->
+    <div class="card">
+      <h2><span class="icon">🗄️</span> Data Storage &amp; Security</h2>
+      <ul>
+        <li>Account and family tree data is stored in a PostgreSQL database
+            hosted via Supabase.</li>
+        <li>Photos are stored in S3-compatible object storage with access
+            restricted to authenticated users of your family.</li>
+        <li>All data in transit is encrypted using TLS 1.2 or higher.</li>
+        <li>Session tokens are persisted locally on your device using
+            <code>shared_preferences</code> and are not shared with any
+            third party.</li>
+        <li>We apply reasonable organisational and technical safeguards;
+            however, no internet transmission is 100% secure.</li>
+      </ul>
+    </div>
+
+    <!-- Data retention -->
+    <div class="card">
+      <h2><span class="icon">🕐</span> Data Retention</h2>
+      <ul>
+        <li>Your account and family tree data is retained for as long as your
+            account is active.</li>
+        <li>Server request logs are retained for up to 30 days and then
+            deleted.</li>
+        <li>When you delete your account, all associated user records and
+            uploaded photos are permanently removed. See <em>Your Rights</em>
+            below.</li>
+      </ul>
+    </div>
+
+    <!-- Your rights -->
+    <div class="card">
+      <h2><span class="icon">✅</span> Your Rights &amp; Choices</h2>
+      <ul>
+        <li><strong>Access:</strong> You can view all personal data in the app
+            at any time.</li>
+        <li><strong>Correction:</strong> Update your display name and family
+            member information directly in the app.</li>
+        <li><strong>Export:</strong> Use the "Export Tree" feature to download
+            all your family tree data as JSON.</li>
+        <li><strong>Deletion:</strong> Delete your account from the app's
+            account settings. This permanently removes your user record and all
+            photos you uploaded. Family tree data you contributed to a shared
+            family may be retained if other members remain active.</li>
+        <li><strong>OAuth revocation:</strong> If you signed in with Google or
+            Facebook, you may revoke access at any time through your Google
+            Account or Facebook App settings.</li>
+      </ul>
+      <div class="highlight">
+        To request manual data deletion or export, email us at the address
+        listed in the <em>Contact Us</em> section below.
+      </div>
+    </div>
+
+    <!-- Children -->
+    <div class="card">
+      <h2><span class="icon">👶</span> Children's Privacy</h2>
+      <p>
+        Family Tree App is not directed at children under 13 (or the applicable
+        age of digital consent in your jurisdiction). We do not knowingly
+        collect personal data from children. Family members of any age may be
+        <em>recorded</em> in the tree by an adult account holder, but no
+        account may be created for a minor.
+      </p>
+      <p>
+        If you believe we have inadvertently collected data from a child, please
+        contact us immediately so we can delete it.
+      </p>
+    </div>
+
+    <!-- Changes -->
+    <div class="card">
+      <h2><span class="icon">📝</span> Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy from time to time. The "Effective"
+        date at the top of the page will reflect the most recent revision. For
+        material changes, we will notify you via an in-app notice or email
+        before the change takes effect.
+      </p>
+      <p>
+        Continued use of the app after the effective date constitutes acceptance
+        of the revised policy.
+      </p>
+    </div>
+
+    <!-- Contact -->
+    <div class="card">
+      <h2><span class="icon">📬</span> Contact Us</h2>
+      <p>
+        If you have questions, concerns, or requests regarding this Privacy
+        Policy or your personal data, please reach out:
+      </p>
+      <ul>
+        <li><strong>GitHub:</strong>
+          <a href="https://github.com/soumitroauddy/FamilyTree/issues"
+             target="_blank" rel="noopener">
+            github.com/soumitroauddy/FamilyTree/issues
+          </a>
+        </li>
+      </ul>
+      <p style="margin-top:.7rem;">
+        We aim to respond to all privacy-related requests within 30 days.
+      </p>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Family Tree App &mdash; All rights reserved.</p>
+    <p style="margin-top:.3rem;">
+      <a href="index.html">Home</a>
+    </p>
+  </footer>
+
+</body>
+</html>
