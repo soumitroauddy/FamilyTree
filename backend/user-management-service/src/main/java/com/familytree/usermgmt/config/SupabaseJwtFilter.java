@@ -2,7 +2,7 @@ package com.familytree.usermgmt.config;
 
 import com.familytree.usermgmt.service.UserSyncService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
+import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -77,7 +77,15 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
 
     String token = header.substring(7);
     try {
-      var parserBuilder = Jwts.parser().keyLocator(this::locateKey);
+      var parserBuilder =
+          Jwts.parser()
+              .keyLocator(
+                  jwtHeader -> {
+                    if (!(jwtHeader instanceof ProtectedHeader protectedHeader)) {
+                      throw new JwtException("JWT header must be integrity protected");
+                    }
+                    return locateKey(protectedHeader);
+                  });
       if (expectedIssuer != null) {
         parserBuilder.requireIssuer(expectedIssuer);
       }
@@ -96,7 +104,7 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
     }
   }
 
-  private Key locateKey(Header header) {
+  private Key locateKey(ProtectedHeader header) {
     String algorithm = header.getAlgorithm();
     if (algorithm == null) {
       throw new JwtException("JWT algorithm header is missing");
