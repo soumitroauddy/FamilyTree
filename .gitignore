@@ -30,4 +30,7 @@ replay_pid*
 *.iws
 # .vscode/ is intentionally not ignored — launch/task configs may be committed
 
+# ── Interview / personal notes ───────────────────────────────────────────────
+interviewquestions/
+
 # ── Flutter/Dart artifacts handled by app/.gitignore ─────────────────────────
